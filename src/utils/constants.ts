@@ -65,15 +65,15 @@ export const STAT_MAX: Record<string, number> = {
 }
 
 export const HABITAT_FR: Record<string, string> = {
-  cave: 'Caverne',
-  forest: 'Forêt',
-  grassland: 'Prairie',
-  mountain: 'Montagne',
-  rare: 'Rare',
-  'rough-terrain': 'Terrain accidenté',
-  sea: 'Mer',
-  urban: 'Urbain',
-  'waters-edge': "Bord de l'eau",
+  cave: 'Grottes',
+  forest: 'Forêts',
+  grassland: 'Champs',
+  mountain: 'Montagnes',
+  rare: 'Rares',
+  'rough-terrain': 'Milieux hostiles',
+  sea: 'Mers',
+  urban: 'Urbains',
+  'waters-edge': 'Marécages',
 }
 
 export const COLOR_FR: Record<string, string> = {

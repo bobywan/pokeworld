@@ -2,11 +2,10 @@ import { useMemo, useState } from 'react'
 import { usePokedex } from './hooks/usePokedex'
 import { PokemonCard } from './components/PokemonCard'
 import { LoadingSkeleton } from './components/LoadingSkeleton'
-import { TypeBadge } from './components/TypeBadge'
-import { KANTO_COUNT, GEN1_TYPES } from './utils/constants'
-import { cn } from './utils/cn'
+import { KANTO_COUNT } from './utils/constants'
 import { matchesPokemon, getSearchHint } from './utils/search'
 import { SearchHelpModal } from './components/SearchHelpModal'
+import { TypeFilters } from './components/TypeFilters'
 
 export default function App() {
   const { pokemon, isLoading, loaded, error } = usePokedex()
@@ -104,34 +103,11 @@ export default function App() {
             )}
           </div>
 
-          {/* Filtres par type — sélection multiple (logique ET) */}
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
-            <button
-              onClick={clearTypes}
-              className={cn(
-                'rounded-badge px-3 py-1 text-[10px] font-semibold transition-all duration-150 active:scale-95',
-                activeTypes.size === 0
-                  ? 'bg-text-primary text-text-inverse shadow-sm'
-                  : 'bg-surface-muted text-text-secondary hover:bg-surface-border',
-              )}
-            >
-              Tous
-            </button>
-            {GEN1_TYPES.map((type) => (
-              <button
-                key={type}
-                onClick={() => toggleType(type)}
-                className={cn(
-                  'transition-all duration-150 active:scale-95',
-                  activeTypes.has(type)
-                    ? 'ring-2 ring-offset-1 ring-text-primary scale-105'
-                    : 'opacity-75 hover:opacity-100',
-                )}
-              >
-                <TypeBadge type={type} small />
-              </button>
-            ))}
-          </div>
+          <TypeFilters
+            activeTypes={activeTypes}
+            onToggle={toggleType}
+            onClear={clearTypes}
+          />
         </div>
       </header>
 

@@ -1,15 +1,21 @@
 import { TYPE_COLORS, TYPE_FR } from '../utils/constants'
+import { cn } from '../utils/cn'
 
-interface Props {
+interface TypeBadgeProps {
   type: string
   small?: boolean
+  className?: string
 }
 
-export function TypeBadge({ type, small }: Props) {
-  const color = TYPE_COLORS[type] ?? '#aaa'
+export function TypeBadge({ type, small = false, className }: TypeBadgeProps) {
+  const color = TYPE_COLORS[type] ?? '#9FA19F'
   return (
     <span
-      className={`inline-block rounded-full font-semibold text-white ${small ? 'px-2 py-0.5 text-[10px]' : 'px-3 py-1 text-xs'}`}
+      className={cn(
+        'inline-block rounded-badge font-semibold text-white tracking-wide uppercase',
+        small ? 'px-2 py-0.5 text-[9px]' : 'px-3 py-1 text-[10px]',
+        className,
+      )}
       style={{ backgroundColor: color }}
     >
       {TYPE_FR[type] ?? type}

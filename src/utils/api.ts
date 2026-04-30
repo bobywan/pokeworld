@@ -1,15 +1,17 @@
 import type { RawPokemon, RawSpecies, PokemonData } from '../types/pokemon'
-import { STAT_FR, HABITAT_FR, COLOR_FR, KANTO_COUNT } from './constants'
+import { STAT_FR, HABITAT_FR, COLOR_FR, KANTO_COUNT, GEN6_TYPES_TO_REMOVE } from './constants'
 
 const BASE = 'https://pokeapi.co/api/v2'
 
 async function fetchPokemon(id: number): Promise<RawPokemon> {
   const res = await fetch(`${BASE}/pokemon/${id}`)
+  if (!res.ok) throw new Error(`Erreur HTTP ${res.status} pour le Pokémon #${id}`)
   return res.json()
 }
 
 async function fetchSpecies(id: number): Promise<RawSpecies> {
   const res = await fetch(`${BASE}/pokemon-species/${id}`)
+  if (!res.ok) throw new Error(`Erreur HTTP ${res.status} pour l'espèce #${id}`)
   return res.json()
 }
 
@@ -35,8 +37,13 @@ function getEvolutionStage(
   return 3
 }
 
+// Filtre les types non-Gen1 (ex: Fée introduit en Gen 6)
+function filterGen1Types(types: string[]): string[] {
+  return types.filter((t) => !GEN6_TYPES_TO_REMOVE.includes(t as typeof GEN6_TYPES_TO_REMOVE[number]))
+}
+
 export async function fetchAllKantoPokemon(
-  onProgress: (loaded: number) => void,
+  onProgress?: (loaded: number) => void,
 ): Promise<PokemonData[]> {
   const ids = Array.from({ length: KANTO_COUNT }, (_, i) => i + 1)
 
@@ -52,7 +59,7 @@ export async function fetchAllKantoPokemon(
     ])
     pokemonResults.push(...pBatch)
     speciesResults.push(...sBatch)
-    onProgress(Math.min(i + BATCH, KANTO_COUNT))
+    onProgress?.(Math.min(i + BATCH, KANTO_COUNT))
   }
 
   const speciesMap = new Map<number, RawSpecies>()
@@ -60,13 +67,18 @@ export async function fetchAllKantoPokemon(
 
   return pokemonResults.map((p, i) => {
     const species = speciesResults[i]
+    const rawTypes = p.types
+      .sort((a, b) => a.slot - b.slot)
+      .map((t) => t.type.name)
+    const gen1Types = filterGen1Types(rawTypes)
+
     return {
       id: p.id,
       name: getFrName(species),
       frName: getFrName(species),
       height: p.height,
       weight: p.weight,
-      types: p.types.sort((a, b) => a.slot - b.slot).map((t) => t.type.name),
+      types: gen1Types.length > 0 ? gen1Types : rawTypes,
       stats: p.stats.map((s) => ({
         name: STAT_FR[s.stat.name] ?? s.stat.name,
         rawName: s.stat.name,

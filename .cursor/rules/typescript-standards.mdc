@@ -1,0 +1,55 @@
+---
+description: Standards TypeScript — typage strict, conventions de nommage
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Standards TypeScript
+
+## Typage
+
+- **Toujours typer** les props de composants avec une `interface` nommée (pas de `type` pour les props)
+- **Pas de `any`** — utiliser `unknown` si le type est vraiment inconnu
+- **Préférer les types inférés** quand TypeScript peut les déduire
+- Exporter les interfaces depuis `src/types/` si réutilisées dans plusieurs fichiers
+
+```ts
+// ✅ BON
+interface PokemonCardProps {
+  pokemon: PokemonData
+  className?: string
+}
+
+// ❌ MAUVAIS
+const PokemonCard = (props: any) => { ... }
+```
+
+## Conventions de nommage
+
+| Élément | Convention | Exemple |
+|---|---|---|
+| Composant | PascalCase | `PokemonCard` |
+| Hook | camelCase + `use` prefix | `usePokedex` |
+| Util/helper | camelCase | `hexToRgba` |
+| Constante | UPPER_SNAKE_CASE | `TYPE_COLORS` |
+| Interface | PascalCase | `PokemonData` |
+| Fichier composant | PascalCase | `PokemonCard.tsx` |
+| Fichier util/hook | camelCase | `usePokedex.ts` |
+
+## Imports
+
+- Imports de type avec `import type { ... }` systématiquement
+- Ordre : React → libs externes → modules internes (types → hooks → utils → composants)
+
+```ts
+// ✅ BON
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import type { PokemonData } from '../types/pokemon'
+import { fetchAllKantoPokemon } from '../utils/api'
+```
+
+## Erreurs et données manquantes
+
+- Toujours gérer les cas `null` et `undefined` explicitement
+- Les fonctions API retournent `Promise<T>` avec des erreurs typées

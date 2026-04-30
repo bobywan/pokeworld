@@ -1,22 +1,22 @@
+// Types Gen 1 uniquement — le type Fée (Fairy) n'existait pas dans Rouge/Bleu
 export const TYPE_COLORS: Record<string, string> = {
-  normal: '#A8A878',
-  fire: '#EE8130',
-  water: '#6390F0',
-  electric: '#F7D02C',
-  grass: '#7AC74C',
-  ice: '#96D9D6',
-  fighting: '#C22E28',
-  poison: '#A33EA1',
-  ground: '#E2BF65',
-  flying: '#A98FF3',
-  psychic: '#F95587',
-  bug: '#A6B91A',
-  rock: '#B6A136',
-  ghost: '#735797',
-  dragon: '#6F35FC',
-  dark: '#705746',
-  steel: '#B7B7CE',
-  fairy: '#D685AD',
+  normal: '#9FA19F',
+  fire: '#E62829',
+  water: '#2980EF',
+  electric: '#FAC000',
+  grass: '#3FA129',
+  ice: '#3DCEF3',
+  fighting: '#FF8000',
+  poison: '#8F41CB',
+  ground: '#915121',
+  flying: '#81B9EF',
+  psychic: '#EF4179',
+  bug: '#91A119',
+  rock: '#AFA981',
+  ghost: '#704170',
+  dragon: '#5060E1',
+  dark: '#624D4E',
+  steel: '#60A1B8',
 }
 
 export const TYPE_FR: Record<string, string> = {
@@ -37,8 +37,14 @@ export const TYPE_FR: Record<string, string> = {
   dragon: 'Dragon',
   dark: 'Ténèbres',
   steel: 'Acier',
-  fairy: 'Fée',
 }
+
+// Liste ordonnée des types Gen 1 pour les filtres (sans Fée)
+export const GEN1_TYPES = [
+  'normal', 'fire', 'water', 'electric', 'grass', 'ice',
+  'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug',
+  'rock', 'ghost', 'dragon', 'dark', 'steel',
+] as const
 
 export const STAT_FR: Record<string, string> = {
   hp: 'PV',
@@ -90,3 +96,6 @@ export const STAGE_FR: Record<number, string> = {
 }
 
 export const KANTO_COUNT = 151
+
+// Types Fée à supprimer des données Gen 1 (introduit en Gen 6)
+export const GEN6_TYPES_TO_REMOVE = ['fairy'] as const

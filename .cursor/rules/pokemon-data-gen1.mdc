@@ -1,0 +1,47 @@
+---
+description: Règles métier Pokémon Gen 1 — données fidèles à Rouge/Bleu
+alwaysApply: true
+---
+
+# Données Pokémon — Génération 1 (Rouge & Bleu)
+
+## Contraintes absolues
+
+- **Uniquement les Pokémon IDs 1 à 151**
+- **Le type Fée (Fairy) n'existe PAS** en Gen 1 — ne jamais l'afficher ni le filtrer
+- Les Pokémon ayant reçu le type Fée en Gen 6 (ex: Rondoudou, Leveinard) doivent être affichés **sans ce type**
+
+## Types valides Gen 1 (17 types)
+
+```
+Normal, Feu, Eau, Électrik, Plante, Glace,
+Combat, Poison, Sol, Vol, Psy, Insecte,
+Roche, Spectre, Dragon, Ténèbres, Acier
+```
+
+> ⚠️ "Ténèbres" (Dark) et "Acier" (Steel) ont été introduits en Gen 2, mais sont inclus ici par convention des données PokéAPI.
+
+## Filtrage des types
+
+Dans `src/utils/constants.ts`, la liste `ALL_TYPES` utilisée pour les filtres **ne doit pas inclure** `fairy`.
+
+```ts
+// ✅ BON — fairy absent
+export const GEN1_TYPES = ['normal','fire','water','electric','grass','ice',
+  'fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon',
+  'dark','steel']
+
+// ❌ MAUVAIS — fairy inclus
+const ALL_TYPES = Object.keys(TYPE_FR) // TYPE_FR contient fairy → interdit
+```
+
+## Noms français
+
+- Toujours afficher le nom **français** (`frName`) récupéré depuis PokéAPI (`/pokemon-species/{id}`)
+- Fallback sur le nom anglais si le nom FR est absent
+
+## Stades d'évolution
+
+- Stade 1 = Forme de base
+- Stade 2 = 1ère évolution
+- Stade 3 = 2ème évolution (niveau max Kanto)

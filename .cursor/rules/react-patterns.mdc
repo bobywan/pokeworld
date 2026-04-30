@@ -1,0 +1,47 @@
+---
+description: Patterns React — composants, hooks, performance
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Patterns React
+
+## Composants
+
+- **Composants fonctionnels** uniquement (pas de class components)
+- **Un composant par fichier** — les sous-composants locaux (ex: `InfoRow`) peuvent rester dans le même fichier s'ils ne sont utilisés que là
+- Props destructurées directement dans la signature
+- Exporter en **named export** (pas de default export pour les composants)
+
+```tsx
+// ✅ BON
+export function PokemonCard({ pokemon, className }: PokemonCardProps) { ... }
+
+// ❌ MAUVAIS
+export default function(props) { ... }
+```
+
+## Hooks
+
+- Logique de fetch → dans `src/hooks/`
+- Utiliser **TanStack Query** (`useQuery`) pour tout appel API, jamais de `useEffect` + `fetch` manuels
+- Les hooks retournent un objet nommé (pas un tableau sauf si pattern similaire à `useState`)
+
+```ts
+// ✅ BON — avec React Query
+export function usePokedex() {
+  const query = useQuery({ queryKey: ['pokedex'], queryFn: fetchAllKantoPokemon })
+  return { pokemon: query.data ?? [], isLoading: query.isLoading, error: query.error }
+}
+```
+
+## Performance
+
+- `useMemo` pour les calculs dérivés coûteux (filtrage, tri de listes)
+- `useCallback` uniquement si la fonction est passée en prop à un composant mémoïsé
+- Images Pokémon avec `loading="lazy"` obligatoirement
+
+## Gestion des états d'UI
+
+- `loading` / `error` / `empty` — toujours gérer les trois états dans les listes
+- Skeleton loaders pour le chargement initial (jamais de spinner seul)

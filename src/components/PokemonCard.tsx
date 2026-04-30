@@ -4,7 +4,7 @@ import { TYPE_COLORS, STAGE_FR } from '../utils/constants'
 import { TypeBadge } from './TypeBadge'
 import { StatBar } from './StatBar'
 
-interface Props {
+interface PokemonCardProps {
   pokemon: PokemonData
 }
 
@@ -15,78 +15,71 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`
 }
 
-export function PokemonCard({ pokemon }: Props) {
+export function PokemonCard({ pokemon }: PokemonCardProps) {
   const [imgError, setImgError] = useState(false)
-  const primaryColor = TYPE_COLORS[pokemon.types[0]] ?? '#A8A878'
+  const primaryColor = TYPE_COLORS[pokemon.types[0]] ?? '#9FA19F'
 
   return (
-    <div
-      className="pokemon-card group relative overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-    >
-      {/* Card header with type gradient */}
+    <div className="pokemon-card group relative overflow-hidden rounded-card bg-surface shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover">
+      {/* En-tête coloré selon le type */}
       <div
-        className="relative flex h-44 items-end justify-center pb-2"
+        className="relative flex h-40 items-end justify-center pb-2"
         style={{
-          background: `linear-gradient(135deg, ${hexToRgba(primaryColor, 0.25)} 0%, ${hexToRgba(primaryColor, 0.12)} 100%)`,
+          background: `linear-gradient(145deg, ${hexToRgba(primaryColor, 0.22)} 0%, ${hexToRgba(primaryColor, 0.08)} 100%)`,
         }}
       >
-        {/* Decorative circles */}
+        {/* Cercles décoratifs */}
         <div
-          className="absolute -right-6 -top-6 h-32 w-32 rounded-full opacity-20"
+          className="absolute -right-5 -top-5 h-28 w-28 rounded-full opacity-15"
           style={{ backgroundColor: primaryColor }}
         />
         <div
-          className="absolute -left-4 -bottom-4 h-24 w-24 rounded-full opacity-10"
+          className="absolute -left-4 bottom-0 h-20 w-20 rounded-full opacity-10"
           style={{ backgroundColor: primaryColor }}
         />
 
-        {/* Pokémon number */}
-        <span className="absolute left-3 top-3 font-mono text-xs font-bold text-gray-400">
+        {/* Numéro */}
+        <span className="absolute left-3 top-3 font-mono text-[10px] font-bold text-text-muted">
           #{String(pokemon.id).padStart(3, '0')}
         </span>
 
-        {/* Pokémon image */}
+        {/* Image officielle */}
         <img
-          src={imgError ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png` : pokemon.sprite}
+          src={
+            imgError
+              ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`
+              : pokemon.sprite
+          }
           alt={pokemon.name}
           onError={() => setImgError(true)}
-          className="relative z-10 h-36 w-36 object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-110"
+          className="relative z-10 h-32 w-32 object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
         />
       </div>
 
-      {/* Card body */}
-      <div className="p-4">
-        {/* Name */}
-        <h2 className="mb-2 text-lg font-bold text-gray-800">{pokemon.name}</h2>
+      {/* Corps de la carte */}
+      <div className="p-3">
+        <h2 className="mb-2 text-sm font-bold text-text-primary leading-tight">{pokemon.name}</h2>
 
-        {/* Types */}
-        <div className="mb-3 flex flex-wrap gap-1.5">
+        <div className="mb-3 flex flex-wrap gap-1">
           {pokemon.types.map((t) => (
             <TypeBadge key={t} type={t} small />
           ))}
         </div>
 
-        {/* Info grid */}
-        <div className="mb-3 grid grid-cols-2 gap-x-2 gap-y-1 rounded-xl bg-gray-50 p-2.5 text-[11px]">
+        <div className="mb-3 grid grid-cols-2 gap-x-2 gap-y-1 rounded-lg bg-surface-subtle p-2 text-[10px]">
           <InfoRow label="Habitat" value={pokemon.habitat ?? 'Inconnu'} />
           <InfoRow label="Couleur" value={pokemon.color} />
-          <InfoRow label="Hauteur" value={`${(pokemon.height / 10).toFixed(1)} m`} />
+          <InfoRow label="Taille" value={`${(pokemon.height / 10).toFixed(1)} m`} />
           <InfoRow label="Poids" value={`${(pokemon.weight / 10).toFixed(1)} kg`} />
           <div className="col-span-2">
             <InfoRow label="Stade" value={STAGE_FR[pokemon.stage]} />
           </div>
         </div>
 
-        {/* Stats */}
         <div className="space-y-1">
           {pokemon.stats.map((s) => (
-            <StatBar
-              key={s.rawName}
-              name={s.name}
-              rawName={s.rawName}
-              value={s.value}
-            />
+            <StatBar key={s.rawName} name={s.name} rawName={s.rawName} value={s.value} />
           ))}
         </div>
       </div>
@@ -96,9 +89,9 @@ export function PokemonCard({ pokemon }: Props) {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-baseline gap-1">
-      <span className="shrink-0 font-medium text-gray-400">{label} :</span>
-      <span className="font-semibold text-gray-700">{value}</span>
+    <div className="flex items-baseline gap-1 min-w-0">
+      <span className="shrink-0 font-medium text-text-muted">{label} :</span>
+      <span className="font-semibold text-text-secondary truncate">{value}</span>
     </div>
   )
 }

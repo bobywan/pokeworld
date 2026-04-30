@@ -1,0 +1,48 @@
+---
+description: Conventions Tailwind CSS et design system du projet
+globs: **/*.{tsx,ts,css}
+alwaysApply: false
+---
+
+# Design System — Tailwind CSS
+
+## Tokens de design (définis dans tailwind.config.js)
+
+Utiliser toujours les tokens du projet, jamais les valeurs brutes Tailwind par défaut pour :
+- **Couleurs** → `colors.surface`, `colors.brand`, `colors.text.*`
+- **Rayons** → `rounded-card`, `rounded-badge`
+- **Ombres** → `shadow-card`, `shadow-card-hover`
+- **Typographie** → `font-pokemon` (Press Start 2P) pour les titres déco, `font-sans` pour le corps
+
+## Règles Tailwind
+
+- **Mobile-first obligatoire** : écrire les styles base pour mobile, puis `sm:`, `md:`, `lg:`, `xl:` pour agrandir
+- **Pas de valeurs arbitraires** `[...]` si un token équivalent existe dans la config
+- **Ordre des classes** : layout → flexbox/grid → espacement → taille → typographie → couleur → effets → états
+
+```tsx
+// ✅ BON — mobile-first, tokens du projet
+<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+
+// ❌ MAUVAIS — desktop-first, pas de responsive
+<div className="grid grid-cols-5 gap-4">
+```
+
+## Couleurs de type Pokémon
+
+Les couleurs de type sont dans `src/utils/constants.ts` (`TYPE_COLORS`).
+Ne jamais hardcoder une couleur de type directement dans le JSX — toujours passer par `TYPE_COLORS[type]`.
+
+## Composants stylisés
+
+Les variantes de composants se définissent avec `cva` (class-variance-authority) si plusieurs variantes existent.
+Sinon, une simple fonction `cn()` (clsx + tailwind-merge) pour composer les classes dynamiquement.
+
+```tsx
+// ✅ BON — composition propre
+import { cn } from '../utils/cn'
+<button className={cn('base-classes', isActive && 'active-classes')} />
+
+// ❌ MAUVAIS — template literals complexes
+<button className={`base ${isActive ? 'active' : 'inactive'} other`} />
+```

@@ -5,9 +5,27 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    font-family: 'Inter', sans-serif;
-    @apply bg-gray-50;
+    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-surface-subtle text-text-primary;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-input bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse shadow-card transition-all duration-200 hover:bg-brand-hover active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .input-search {
+    @apply w-full rounded-input border border-surface-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all duration-200 focus:border-brand focus:shadow-input;
+  }
+
+  .card {
+    @apply rounded-card bg-surface shadow-card transition-all duration-300;
   }
 }
 
@@ -30,6 +48,6 @@
     break-inside: avoid;
     page-break-inside: avoid;
     box-shadow: none !important;
-    border: 1px solid #e5e7eb !important;
+    border: 1px solid #e9ecef !important;
   }
 }

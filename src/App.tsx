@@ -3,92 +3,130 @@ import { usePokedex } from './hooks/usePokedex'
 import { PokemonCard } from './components/PokemonCard'
 import { LoadingSkeleton } from './components/LoadingSkeleton'
 import { TypeBadge } from './components/TypeBadge'
-import { KANTO_COUNT, TYPE_FR } from './utils/constants'
-
-const ALL_TYPES = Object.keys(TYPE_FR)
+import { KANTO_COUNT, GEN1_TYPES } from './utils/constants'
+import { cn } from './utils/cn'
+import { matchesPokemon, getSearchHint } from './utils/search'
+import { SearchHelpModal } from './components/SearchHelpModal'
 
 export default function App() {
-  const { pokemon, loading, loaded, error } = usePokedex()
+  const { pokemon, isLoading, loaded, error } = usePokedex()
   const [search, setSearch] = useState('')
-  const [activeType, setActiveType] = useState<string | null>(null)
+  const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set())
+  const [helpOpen, setHelpOpen] = useState(false)
+
+  const toggleType = (type: string) => {
+    setActiveTypes((prev) => {
+      const next = new Set(prev)
+      if (next.has(type)) {
+        next.delete(type)
+      } else {
+        next.add(type)
+      }
+      return next
+    })
+  }
+
+  const clearTypes = () => setActiveTypes(new Set())
+
+  const searchHint = useMemo(() => getSearchHint(search), [search])
 
   const filtered = useMemo(() => {
     return pokemon.filter((p) => {
-      const matchSearch =
-        search === '' ||
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        String(p.id).padStart(3, '0').includes(search)
-      const matchType = activeType === null || p.types.includes(activeType)
+      const matchSearch = matchesPokemon(p, search)
+      // Logique ET : le Pokémon doit posséder TOUS les types sélectionnés
+      const matchType =
+        activeTypes.size === 0 || [...activeTypes].every((t) => p.types.includes(t))
       return matchSearch && matchType
     })
-  }, [pokemon, search, activeType])
+  }, [pokemon, search, activeTypes])
 
   const handlePrint = () => window.print()
 
+  const progress = Math.round((loaded / KANTO_COUNT) * 100)
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-subtle">
       {/* Header */}
-      <header className="no-print sticky top-0 z-20 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur-sm">
-        <div className="mx-auto max-w-7xl px-4 py-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
+      <header className="no-print sticky top-0 z-20 border-b border-surface-border bg-surface/95 backdrop-blur-sm">
+        <div className="mx-auto max-w-7xl px-4 py-3">
+          {/* Logo + actions */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
               <img
                 src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
                 alt="Pokéball"
-                className="h-8 w-8"
+                className="h-7 w-7 shrink-0"
               />
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
+              <div className="min-w-0">
+                <h1 className="truncate text-base font-bold text-text-primary sm:text-lg">
                   Le Pokédex de Boby &amp; Fils
                 </h1>
-                <p className="text-xs text-gray-500">Région de Kanto — {KANTO_COUNT} Pokémon</p>
+                <p className="text-[10px] text-text-muted">Kanto — Gen 1</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              {!loading && (
-                <span className="text-sm text-gray-500">
-                  {filtered.length}{filtered.length !== pokemon.length ? `/${pokemon.length}` : ''} Pokémon
+            <div className="flex items-center gap-2 shrink-0">
+              {!isLoading && (
+                <span className="hidden text-xs text-text-muted sm:block">
+                  {filtered.length}
+                  {filtered.length !== pokemon.length ? `/${pokemon.length}` : ''} Pokémon
                 </span>
               )}
-              <button
-                onClick={handlePrint}
-                disabled={loading}
-                className="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-600 disabled:opacity-50"
-              >
-                🖨️ Imprimer
+              <button onClick={handlePrint} disabled={isLoading} className="btn-primary">
+                <span className="hidden xs:inline">Imprimer</span>
+                <span className="xs:hidden">🖨️</span>
               </button>
             </div>
           </div>
 
-          {/* Search */}
+          {/* Barre de recherche */}
           <div className="mt-3">
-            <input
-              type="text"
-              placeholder="Rechercher par nom ou numéro…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700 outline-none ring-red-400 transition focus:ring-2"
-            />
+            <div className="flex items-center gap-2">
+              <input
+                type="search"
+                placeholder="Nom, numéro, habitat, poids>50, taille<1…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="input-search"
+              />
+              <button
+                onClick={() => setHelpOpen(true)}
+                title="Aide à la recherche"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-input border border-surface-border bg-surface text-sm font-bold text-text-muted transition hover:border-brand hover:text-brand"
+              >
+                ?
+              </button>
+            </div>
+            {searchHint && (
+              <p className="mt-1.5 px-1 text-[10px] text-text-muted">
+                💡 {searchHint}
+              </p>
+            )}
           </div>
 
-          {/* Type filter */}
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          {/* Filtres par type — sélection multiple (logique ET) */}
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
             <button
-              onClick={() => setActiveType(null)}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                activeType === null
-                  ? 'bg-gray-800 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              onClick={clearTypes}
+              className={cn(
+                'rounded-badge px-3 py-1 text-[10px] font-semibold transition-all duration-150 active:scale-95',
+                activeTypes.size === 0
+                  ? 'bg-text-primary text-text-inverse shadow-sm'
+                  : 'bg-surface-muted text-text-secondary hover:bg-surface-border',
+              )}
             >
               Tous
             </button>
-            {ALL_TYPES.map((type) => (
+            {GEN1_TYPES.map((type) => (
               <button
                 key={type}
-                onClick={() => setActiveType(activeType === type ? null : type)}
-                className={`transition ${activeType === type ? 'ring-2 ring-offset-1 ring-gray-400' : 'opacity-80 hover:opacity-100'}`}
+                onClick={() => toggleType(type)}
+                className={cn(
+                  'transition-all duration-150 active:scale-95',
+                  activeTypes.has(type)
+                    ? 'ring-2 ring-offset-1 ring-text-primary scale-105'
+                    : 'opacity-75 hover:opacity-100',
+                )}
               >
                 <TypeBadge type={type} small />
               </button>
@@ -97,54 +135,75 @@ export default function App() {
         </div>
       </header>
 
-      {/* Loading progress */}
-      {loading && (
+      {/* Barre de progression */}
+      {isLoading && (
         <div className="no-print mx-auto max-w-7xl px-4 pt-4">
-          <div className="flex items-center gap-3 rounded-xl bg-blue-50 p-4 text-sm text-blue-700">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
-            <span>Chargement… {loaded}/{KANTO_COUNT} Pokémon</span>
-            <div className="flex-1">
-              <div className="h-1.5 overflow-hidden rounded-full bg-blue-200">
-                <div
-                  className="h-full rounded-full bg-blue-500 transition-all duration-300"
-                  style={{ width: `${(loaded / KANTO_COUNT) * 100}%` }}
-                />
+          <div className="rounded-card bg-surface p-4 shadow-card">
+            <div className="mb-2 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 text-text-secondary">
+                <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+                <span>Chargement des données…</span>
               </div>
+              <span className="font-semibold text-text-primary">
+                {loaded}/{KANTO_COUNT}
+              </span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-surface-muted">
+              <div
+                className="h-full rounded-full bg-brand transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
             </div>
           </div>
         </div>
       )}
 
-      {/* Error */}
+      {/* Erreur */}
       {error && (
         <div className="mx-auto max-w-7xl px-4 pt-4">
-          <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            Erreur lors du chargement : {error}
+          <div className="rounded-card bg-red-50 p-4 text-sm text-red-700 shadow-card">
+            <p className="font-semibold">Erreur de chargement</p>
+            <p className="mt-1 text-xs opacity-80">{error}</p>
           </div>
         </div>
       )}
 
-      {/* Grid */}
-      <main className="mx-auto max-w-7xl px-4 py-6">
-        <div className="print-grid grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {loading
+      {/* Grille */}
+      <main className="mx-auto max-w-7xl px-4 py-5">
+        {/* Compteur mobile */}
+        {!isLoading && (
+          <p className="mb-3 text-xs text-text-muted sm:hidden">
+            {filtered.length}
+            {filtered.length !== pokemon.length ? `/${pokemon.length}` : ''} Pokémon
+          </p>
+        )}
+
+        <div className="print-grid grid grid-cols-2 gap-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5">
+          {isLoading
             ? [...Array(KANTO_COUNT)].map((_, i) => <LoadingSkeleton key={i} />)
             : filtered.map((p) => <PokemonCard key={p.id} pokemon={p} />)}
         </div>
 
-        {!loading && filtered.length === 0 && (
-          <div className="py-24 text-center text-gray-400">
-            <p className="text-4xl">😔</p>
-            <p className="mt-3 text-lg font-medium">Aucun Pokémon trouvé</p>
-            <p className="text-sm">Essayez un autre nom ou type</p>
+        {!isLoading && filtered.length === 0 && (
+          <div className="py-20 text-center">
+            <p className="text-5xl">😔</p>
+            <p className="mt-4 text-base font-semibold text-text-primary">Aucun Pokémon trouvé</p>
+            <p className="mt-1 text-sm text-text-muted">Essayez un autre nom ou type</p>
           </div>
         )}
       </main>
 
+      <SearchHelpModal isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+
       {/* Footer */}
-      <footer className="no-print border-t border-gray-200 py-6 text-center text-xs text-gray-400">
-        Données fournies par{' '}
-        <a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer" className="underline">
+      <footer className="no-print border-t border-surface-border py-6 text-center text-xs text-text-muted">
+        Données :{' '}
+        <a
+          href="https://pokeapi.co"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-text-secondary"
+        >
           PokéAPI
         </a>{' '}
         · Pokémon © Nintendo / Game Freak

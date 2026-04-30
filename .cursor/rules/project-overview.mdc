@@ -1,0 +1,32 @@
+---
+description: Vue d'ensemble du projet Pokédex Gen 1 — toujours lire en premier
+alwaysApply: true
+---
+
+# Pokeworld — Pokédex Génération 1
+
+Application React + TypeScript + Vite affichant les **151 Pokémon Kanto** (Rouge/Bleu).
+
+## Stack technique
+- **React 18** + **TypeScript** (strict)
+- **Tailwind CSS v3** avec design system custom (`tailwind.config.js`)
+- **TanStack Query (React Query)** pour le cache API
+- **PokéAPI** comme source de données
+- **Vercel** pour le déploiement
+
+## Contraintes métier importantes
+- Uniquement les **151 Pokémon de la Gen 1** (IDs 1–151, versions Rouge & Bleu)
+- **Pas de type Fée** (Fairy) — introduit en Gen 6, n'existait pas à l'époque
+- Les types doivent correspondre aux valeurs Gen 1 originales
+- UI entièrement en **français**
+- Design **mobile-first** (breakpoints Tailwind : sm, md, lg, xl)
+
+## Architecture des dossiers
+```
+src/
+  components/   # Composants UI réutilisables
+  hooks/        # Hooks React personnalisés
+  types/        # Interfaces TypeScript
+  utils/        # Constantes, helpers, API
+  design/       # Tokens du design system (si nécessaire)
+```

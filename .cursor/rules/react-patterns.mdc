@@ -1,5 +1,5 @@
 ---
-description: Patterns React — composants, hooks, performance
+description: Patterns React — composants, Server Components, performance
 globs: **/*.tsx
 alwaysApply: false
 ---
@@ -10,8 +10,10 @@ alwaysApply: false
 
 - **Composants fonctionnels** uniquement (pas de class components)
 - **Un composant par fichier** — les sous-composants locaux (ex: `InfoRow`) peuvent rester dans le même fichier s'ils ne sont utilisés que là
+- Props typées avec `type`, pas `interface`
 - Props destructurées directement dans la signature
 - Exporter en **named export** (pas de default export pour les composants)
+- Les pages `app/*/page.tsx` utilisent un `default export` (obligatoire Next.js)
 
 ```tsx
 // ✅ BON
@@ -21,17 +23,18 @@ export function PokemonCard({ pokemon, className }: PokemonCardProps) { ... }
 export default function(props) { ... }
 ```
 
-## Hooks
+## Fetch de données
 
-- Logique de fetch → dans `src/hooks/`
-- Utiliser **TanStack Query** (`useQuery`) pour tout appel API, jamais de `useEffect` + `fetch` manuels
-- Les hooks retournent un objet nommé (pas un tableau sauf si pattern similaire à `useState`)
+- **Server Components par défaut** — le fetch se fait directement dans `app/page.tsx` avec `async/await`
+- `{ next: { revalidate: 86400 } }` sur chaque `fetch` pour le cache ISR Next.js (24h)
+- Jamais de `useEffect` + `fetch` manuel côté client
+- N'ajouter `"use client"` que si le composant utilise `useState`, `useEffect`, ou des API navigateur
 
 ```ts
-// ✅ BON — avec React Query
-export function usePokedex() {
-  const query = useQuery({ queryKey: ['pokedex'], queryFn: fetchAllKantoPokemon })
-  return { pokemon: query.data ?? [], isLoading: query.isLoading, error: query.error }
+// ✅ BON — fetch serveur dans page.tsx
+export default async function Home() {
+  const pokemon = await fetchAllKantoPokemon()
+  return <PokedexClient pokemon={pokemon} />
 }
 ```
 
@@ -43,5 +46,6 @@ export function usePokedex() {
 
 ## Gestion des états d'UI
 
-- `loading` / `error` / `empty` — toujours gérer les trois états dans les listes
+- `loading.tsx` pour l'état de chargement initial (skeleton grid)
+- `error.tsx` pour les erreurs de rendu serveur
 - Skeleton loaders pour le chargement initial (jamais de spinner seul)

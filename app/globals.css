@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  /* ─── Surfaces ──────────────────────────────────────────── */
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f8f9fa;
+  --color-surface-muted: #f1f3f5;
+  --color-surface-border: #e9ecef;
+
+  /* ─── Texte ─────────────────────────────────────────────── */
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #495057;
+  --color-text-muted: #868e96;
+  --color-text-inverse: #ffffff;
+
+  /* ─── Brand — rouge Pokémon ─────────────────────────────── */
+  --color-brand: #e63946;
+  --color-brand-hover: #c1121f;
+  --color-brand-light: #fde8ea;
+
+  /* ─── Typographie ───────────────────────────────────────── */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-pokemon: var(--font-press-start), "Press Start 2P", monospace;
+
+  /* ─── Radius ────────────────────────────────────────────── */
+  --radius-card: 1rem;
+  --radius-badge: 9999px;
+  --radius-input: 0.625rem;
+
+  /* ─── Ombres ────────────────────────────────────────────── */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-input: 0 0 0 3px rgba(230, 57, 70, 0.15);
+
+  /* ─── Breakpoints ───────────────────────────────────────── */
+  --breakpoint-xs: 400px;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    @apply bg-surface-subtle text-text-primary;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-input bg-brand px-4 py-2.5 text-sm font-semibold text-text-inverse shadow-card transition-all duration-200 hover:bg-brand-hover active:scale-95 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .input-search {
+    @apply w-full rounded-input border border-surface-border bg-surface px-4 py-3 text-sm text-text-primary outline-none transition-all duration-200 placeholder:text-text-muted focus:border-brand focus:shadow-input;
+  }
+
+  .card {
+    @apply rounded-card bg-surface shadow-card transition-all duration-300;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none;
+  }
+
+  body {
+    background: white;
+    print-color-adjust: economy;
+  }
+
+  .print-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+
+  .pokemon-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #e9ecef;
+  }
+}
